@@ -19,8 +19,10 @@ class CustomUserManager(BaseUserManager):
     def create_superuser(self, phone, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('role', CustomUser.Role.ADMIN)
+        # role задаётся принудительно — для неё проверки нет.
+        extra_fields['role'] = CustomUser.Role.ADMIN
 
+        # Проверяем, что флаги действительно True (осмысленно только при setdefault).
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Суперпользователь должен иметь is_staff=True')
         if extra_fields.get('is_superuser') is not True:
