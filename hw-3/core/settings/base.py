@@ -199,3 +199,7 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,          # РџСЂРё РѕР±РЅРѕРІР»РµРЅРёРё access РІС‹РґР°РµС‚СЃСЏ РЅРѕРІС‹Р№ refresh
     'BLACKLIST_AFTER_ROTATION': True,       # РЎС‚Р°СЂС‹Р№ refresh СЃСЂР°Р·Сѓ СѓС…РѕРґРёС‚ РІ Р±Р»СЌРєР»РёСЃС‚
 }
+
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")

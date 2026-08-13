@@ -1,8 +1,9 @@
 from rest_framework import serializers
-from apps.testapp.models import CustomUser, Post
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
+
+from apps.testapp.models import CustomUser
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -21,7 +22,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError({"password": "Пароли не совпадают."})
+            raise serializers.ValidationError({'password': 'Пароли не совпадают.'})
         return attrs
 
     def create(self, validated_data):
@@ -31,10 +32,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         refresh = CustomTokenObtainPairSerializer.get_token(instance)
-        data['tokens'] = {
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }
+        data['tokens'] = {'refresh': str(refresh), 'access': str(refresh.access_token)}
         return data
 
 
@@ -42,10 +40,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-
-        token['email'] = user.email
-        token['role'] = user.role
-        token['phone'] = user.phone
+        token['email'], token['role'], token['phone'] = user.email, user.role, user.phone
         return token
 
     def validate(self, attrs):
@@ -62,12 +57,14 @@ class LogoutSerializer(serializers.Serializer):
             token = RefreshToken(attrs['refresh'])
         except TokenError as exc:
             raise serializers.ValidationError({'refresh': 'Недействительный refresh-токен.'}) from exc
-
         if str(token.get('user_id')) != str(self.context['request'].user.id):
             raise serializers.ValidationError({'refresh': 'Токен принадлежит другому пользователю.'})
-
         attrs['token'] = token
         return attrs
 
     def save(self, **kwargs):
         self.validated_data['token'].blacklist()
+
+
+class GoogleAuthSerializer(serializers.Serializer):
+    code = serializers.CharField(required=True, trim_whitespace=True)
