@@ -33,6 +33,8 @@ class CustomUser(AbstractUser):
         ADMIN = "admin", "Администратор"
         MODERATOR = "moderator", "Модератор"
         USER = "user", "Пользователь"
+        STUDENT = "student", "Студент"
+        TEACHER = "teacher", "Учитель"
 
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=255, blank=True, null=True)

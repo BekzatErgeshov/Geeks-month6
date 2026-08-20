@@ -24,6 +24,7 @@ THEME_APPS = [
 
 MY_APPS = [
     'apps.testapp',
+    'apps.lessons',
 ]
 
 DJANGO_APPS = [
@@ -203,3 +204,15 @@ SIMPLE_JWT = {
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
+
+
+# ===== Redis Cache =====
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
