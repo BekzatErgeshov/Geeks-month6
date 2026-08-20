@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from apps.lessons.models import Lesson
 from apps.lessons.serializers import LessonSerializer
 from apps.lessons.permissions import IsTeacherOrReadOnly
+from apps.lessons.tasks import send_lesson_notification
 
 LESSONS_LIST_CACHE_KEY = 'lessons_list'
 LESSONS_LIST_CACHE_TTL = 300        # 5 минут
@@ -13,6 +14,32 @@ LESSON_DETAIL_KEY = 'lesson_detail_{}'
 LESSON_DETAIL_TTL = 600             # 10 минут
 
 LESSON_VIEWS_KEY = 'lesson_views_{}'
+
+class LessonCreateAPIView(generics.CreateAPIView):
+    """
+    POST /api/v1/lessons/create/ — создание урока (только teacher) с уведомлением через Celery
+    """
+    queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer
+    permission_classes = [IsTeacherOrReadOnly]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        
+        lesson = serializer.instance
+        
+        # Сбрасываем кэш списка уроков
+        cache.delete(LESSONS_LIST_CACHE_KEY)
+        
+        # Вызов задачи Celery для отправки уведомлений
+        send_lesson_notification.delay(lesson.id, lesson.title)
+        
+        return Response(
+            {"message": "Урок создан, уведомления отправляются"},
+            status=status.HTTP_201_CREATED
+        )
 
 
 class LessonListCreateView(generics.ListCreateAPIView):
